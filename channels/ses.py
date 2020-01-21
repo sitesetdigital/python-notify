@@ -1,14 +1,14 @@
 from .channel import Channel
 from ..notices.notice import Notice
 from ..types.email import Email
-
+from ..global_config import global_config
 import boto3
 
 
 class SES(Channel):
 
     def __init__(self):
-        self.from_email = 'test@siteset.digital'
+        self.from_email = global_config.email_from_address
 
     def send(self, notice: Notice):
         for n in notice.types:

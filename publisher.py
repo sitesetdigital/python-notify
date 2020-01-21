@@ -1,4 +1,3 @@
-from .channels.channel import Channel
 from .channels.ses import SES
 
 
