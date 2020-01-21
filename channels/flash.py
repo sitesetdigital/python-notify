@@ -1,7 +1,6 @@
 from .channel import Channel
 from ..notices.notice import Notice
 from ..types.message import Message
-from flask import flash
 
 
 class Flash(Channel):
@@ -12,4 +11,6 @@ class Flash(Channel):
                 self._flash_message(n)
 
     def _flash_message(self, message: Message):
-        flash(message.message, message.category)
+        # TODO: support other web frameworks
+        from flask import flash
+        flash(message.message, message.category if message.category is not None else "message")

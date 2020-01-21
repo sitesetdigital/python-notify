@@ -1,4 +1,4 @@
 class Config(object):
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         self.email_from_address = None

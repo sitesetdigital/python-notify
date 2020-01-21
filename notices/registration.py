@@ -2,6 +2,7 @@ from .notice import Notice
 from ..types.email import Email
 from ..types.message import Message
 
+
 class Registration(Notice):
 
     def __init__(self, to_email):
