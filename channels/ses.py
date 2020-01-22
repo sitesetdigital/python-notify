@@ -7,9 +7,6 @@ import boto3
 
 class SES(Channel):
 
-    def __init__(self):
-        self.from_email = global_config.email_from_address
-
     def send(self, notice: Notice):
         for n in notice.types:
             if isinstance(n, Email):
@@ -18,10 +15,11 @@ class SES(Channel):
     def _send_email(self, email: Email):
         ses = boto3.client('ses')
         result = ses.send_email(
-            Source=self.from_email,
+            Source=self._format_name_address(email.from_name, email.from_address) if email.from_address else
+            self._format_name_address(global_config.email_from_name, global_config.email_from_address),
             Destination={
                 'ToAddresses': [
-                    email.to_email
+                    self._format_name_address(email.to_name, email.to_address)
                 ],
                 'CcAddresses': [
 
@@ -36,10 +34,13 @@ class SES(Channel):
                 },
                 'Body': self._create_body(email)
             },
-            ReplyToAddresses=[ email.reply_to ] if email.reply_to else []
+            ReplyToAddresses=[ self._format_name_address(email.reply_to_name, email.reply_to_address) ] if email.reply_to_address else []
         )
 
         return result
+
+    def _format_name_address(self, name, address) -> str:
+        return '%s <%s>' % (name, address) if name else address
 
     def _create_body(self, email: Email) -> dict:
         body = {}
