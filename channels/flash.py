@@ -4,8 +4,12 @@ from ..types.message import Message
 
 
 class Flash(Channel):
+    """Channel for 'flash' messages, which are small prompts shown on web pages in response to user actions"""
 
     def send(self, notice: Notice):
+        """
+        Send notice through flash channel. This channel handles notices of `notify.types.message.Message`
+        """
         for n in notice.types:
             if isinstance(n, Message):
                 self._flash_message(n)
