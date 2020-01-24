@@ -9,5 +9,8 @@ setuptools.setup(
     long_description_content_type = "text/plain",
     url = "https://github.com/yui-konnu/python-notify",
     packages = ['notify'],
+    package_data={
+        'notify': ['*']
+    },
     version = '1.1'
 )
