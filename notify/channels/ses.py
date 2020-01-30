@@ -2,8 +2,6 @@ from .channel import Channel
 from ..notices.notice import Notice
 from ..types.email import Email
 from ..global_config import global_config
-import boto3
-
 
 class SES(Channel):
     """Class for sending notifications via AWS SES"""
@@ -16,10 +14,10 @@ class SES(Channel):
             if isinstance(n, Email):
                 self._send_email(n)
 
-    def _send_email(self, email: Email):
+    def _send_email(self, client, email: Email):
         """Send the given notice as an SES email"""
 
-        ses = boto3.client('ses')
+        ses = client
         result = ses.send_email(
             Source=self._format_name_address(email.from_name, email.from_address) if email.from_address else
             self._format_name_address(global_config.email_from_name, global_config.email_from_address),
