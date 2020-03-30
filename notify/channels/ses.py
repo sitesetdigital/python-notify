@@ -3,6 +3,9 @@ from ..notices.notice import Notice
 from ..types.email import Email
 from ..global_config import global_config
 import boto3
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 class SES(Channel):
     """Class for sending notifications via AWS SES"""
@@ -21,27 +24,38 @@ class SES(Channel):
         if client is None:
             client = boto3.client('ses')
 
-        result = client.send_email(
+        msg = MIMEMultipart()
+
+        msg["Subject"] = email.subject
+        msg["To"] = self._format_name_address(email.to_name, email.to_address)
+        msg["Cc"] = ''
+        msg["Bcc"] = ''
+        msg['reply-to'] = self._format_name_address(email.reply_to_name, email.reply_to_address)
+
+        if email.text_body:
+            msg.attach(
+                MIMEText(email.text_body, 'plain')
+            )
+        
+        if email.html_body:
+            msg.attach(
+                MIMEText(email.html_body, 'html')
+            )
+        
+        for attachment in email.attachments:
+            msg.attach(
+                MIMEApplication(
+                    attachment.file,
+                    Name = attachment.name
+                )
+            )
+
+        result = client.send_raw_email(
             Source=self._format_name_address(email.from_name, email.from_address) if email.from_address else
             self._format_name_address(global_config.email_from_name, global_config.email_from_address),
-            Destination={
-                'ToAddresses': [
-                    self._format_name_address(email.to_name, email.to_address)
-                ],
-                'CcAddresses': [
-
-                ],
-                'BccAddresses': [
-
-                ]
+            RawMessage={
+                'Data': msg.as_string()
             },
-            Message={
-                'Subject': {
-                    'Data': email.subject
-                },
-                'Body': self._create_body(email)
-            },
-            ReplyToAddresses=[ self._format_name_address(email.reply_to_name, email.reply_to_address) ] if email.reply_to_address else []
         )
 
         return result
@@ -52,15 +66,3 @@ class SES(Channel):
         e.g Jane Doe <jane.doe@example.com>
         """
         return '%s <%s>' % (name, address) if name else address
-
-    def _create_body(self, email: Email) -> dict:
-        """Create html/plaintext body payload for send_email request"""
-        body = {}
-
-        if email.text_body:
-            body['Text'] = {'Data': email.text_body}
-
-        if email.html_body:
-            body['Html'] = {'Data': email.html_body}
-
-        return body

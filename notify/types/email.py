@@ -20,6 +20,8 @@ class Email(object):
         `from_address` sets the address that this email is sent from.
 
         `from_name` can be specified to compliment the above address.
+
+        `attachments` optional parameter to supply an array of `Attachment` objects.
         """
         # TODO: support multiple recipients and cc/bcc
         self.to_address = to_address
@@ -35,3 +37,4 @@ class Email(object):
         self.reply_to_name = kwargs.get('reply_to_name')
         self.from_address = kwargs.get('from_address')
         self.from_name = kwargs.get('from_name')
+        self.attachments = kwargs.get('attachments')
